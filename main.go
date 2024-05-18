@@ -29,39 +29,59 @@ func main() {
 		f, err := os.Open(fileName)
 		if err != nil {
 			fmt.Printf("%v : No such file exists\n", fileName)
+			continue
 		}
-		nWords, nChars := getWordsAndCharacters(f)
+		outputString := ""
+		nWords := getWords(f)
 		nBytes := getBytes(f)
-		nLines := getLines(fileName)
+		nLines, nChars := getLinesAndCharacters(fileName)
 
+		if !characterFlag && !wordFlag && !lineFlag && !byteFlag {
+			outputString += fmt.Sprintf("%d\t%d\t%d\t%v", nLines, nWords, nBytes, fileName)
+		} else {
+			if lineFlag {
+				outputString += fmt.Sprintf("%d\t", nLines)
+			}
+			if wordFlag {
+				outputString += fmt.Sprintf("%d\t", nWords)
+			}
+			if characterFlag {
+				outputString += fmt.Sprintf("%d\t", nChars)
+			}
+			if byteFlag {
+				outputString += fmt.Sprintf("%d\t", nBytes)
+			}
+			outputString += fmt.Sprintf("%v", fileName)
+
+		}
+		fmt.Println(outputString)
 	}
 
 	fmt.Println("--------")
 }
 
-func getWordsAndCharacters(f *os.File) (int, int) {
+func getWords(f *os.File) int {
 	var w = 0
-	var c = 0
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanWords)
 	for scanner.Scan() {
 		w++
-		c += len(scanner.Text())
 	}
-	return w, c
+	return w
 }
 
-func getLines(fileName string) int {
+func getLinesAndCharacters(fileName string) (int, int) {
+	nC := 0
 	bts, _ := os.ReadFile(fileName)
 	content := string(bts)
-	return len(strings.Split(content, "\n"))
+	lines := strings.Split(content, "\n")
+	for _, line := range lines {
+		nC += len(line)
+	}
+	return len(strings.Split(content, "\n")) - 1, nC
 }
 
 func getBytes(f *os.File) int {
 	fileInfo, _ := f.Stat()
 	return int(fileInfo.Size())
-}
-
-func getCharacters() int {
-	return 0
 }

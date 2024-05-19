@@ -9,8 +9,6 @@ import (
 )
 
 func main() {
-	fmt.Println("--------")
-
 	var characterFlag bool
 	var wordFlag bool
 	var lineFlag bool
@@ -25,7 +23,7 @@ func main() {
 
 	osArgs := flag.Args()
 
-	for _, fileName := range osArgs {
+	for idx, fileName := range osArgs {
 		f, err := os.Open(fileName)
 		if err != nil {
 			fmt.Printf("%v : No such file exists\n", fileName)
@@ -37,27 +35,43 @@ func main() {
 		nLines, nChars := getLinesAndCharacters(fileName)
 
 		if !characterFlag && !wordFlag && !lineFlag && !byteFlag {
+			if idx == 0 {
+				fmt.Printf("L\tW\tB\tFILE\n")
+			}
 			outputString += fmt.Sprintf("%d\t%d\t%d\t%v", nLines, nWords, nBytes, fileName)
 		} else {
 			if lineFlag {
+				if idx == 0 {
+					fmt.Printf("L\t")
+				}
 				outputString += fmt.Sprintf("%d\t", nLines)
 			}
 			if wordFlag {
+				if idx == 0 {
+					fmt.Printf("W\t")
+				}
 				outputString += fmt.Sprintf("%d\t", nWords)
 			}
 			if characterFlag {
+				if idx == 0 {
+					fmt.Printf("C\t")
+				}
 				outputString += fmt.Sprintf("%d\t", nChars)
 			}
 			if byteFlag {
+				if idx == 0 {
+					fmt.Printf("B\t")
+				}
 				outputString += fmt.Sprintf("%d\t", nBytes)
+			}
+			if idx == 0 {
+				fmt.Printf("FILE\n")
 			}
 			outputString += fmt.Sprintf("%v", fileName)
 
 		}
 		fmt.Println(outputString)
 	}
-
-	fmt.Println("--------")
 }
 
 func getWords(f *os.File) int {
@@ -76,9 +90,12 @@ func getLinesAndCharacters(fileName string) (int, int) {
 	content := string(bts)
 	lines := strings.Split(content, "\n")
 	for _, line := range lines {
-		nC += len(line)
+		for range line {
+			nC++
+		}
+		nC++ // because "\n" is also counted as a character
 	}
-	return len(strings.Split(content, "\n")) - 1, nC
+	return len(lines) - 1, nC - 1 // because last "\n" is extra
 }
 
 func getBytes(f *os.File) int {
